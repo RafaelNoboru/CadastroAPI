@@ -1,0 +1,6 @@
+﻿CREATE TABLE Pessoa (
+    Id INT IDENTITY(1,1) PRIMARY KEY, 
+    Nome NVARCHAR(100) NOT NULL,     
+    Telefone NVARCHAR(15) NOT NULL,  
+    Cpf NVARCHAR(11) NOT NULL        
+);

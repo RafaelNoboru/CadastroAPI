@@ -1,0 +1,131 @@
+﻿@model CadastroAPI.Models.Models.Pessoa
+
+@{
+    ViewData["Title"] = "Editar Pessoa";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+
+<form method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="form-group">
+        <label asp-for="Nome" class="control-label"></label>
+        <input asp-for="Nome" class="form-control" />
+        <span asp-validation-for="Nome" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Telefone" class="control-label"></label>
+        <input asp-for="Telefone" class="form-control" />
+        <span asp-validation-for="Telefone" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Cpf" class="control-label"></label>
+        <input asp-for="Cpf" class="form-control" />
+        <span asp-validation-for="Cpf" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar Pessoa</button>
+</form>
+<hr />
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Endereços</h3>
+    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#modalEndereco">
+        + Adicionar Endereço
+    </button>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Logradouro</th>
+            <th>Cidade</th>
+            <th>Estado</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var endereco in (IEnumerable<CadastroAPI.Models.Models.Endereco>)ViewBag.Enderecos)
+        {
+            <tr>
+                <td>@endereco.Logradouro</td>
+                <td>@endereco.Cidade</td>
+                <td>@endereco.Estado</td>
+                <td>
+                    <form method="post" action="@Url.Action("DeleteEndereco", "Pessoa")" style="display:inline;">
+                        <input type="hidden" name="id" value="@endereco.Id" />
+                        <button type="submit" class="btn btn-danger">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div class="modal fade" id="modalEndereco" tabindex="-1" role="dialog" aria-labelledby="modalEnderecoLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEnderecoLabel">Adicionar Endereço</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form method="post" action="@Url.Action("AddEndereco", "Pessoa")">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="PessoaId" value="@Model.Id" />
+
+                <div class="form-group">
+                    <label for="Cep">CEP</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="Cep" name="Cep" required />
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-info" onclick="consultarCep()">Buscar CEP</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="Logradouro">Logradouro</label>
+                    <input type="text" class="form-control" id="Logradouro" name="Logradouro" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="Cidade">Cidade</label>
+                    <input type="text" class="form-control" id="Cidade" name="Cidade" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="Estado">Estado</label>
+                    <input type="text" class="form-control" id="Estado" name="Estado" required />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </form>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+            <script>
+                async function consultarCep() {
+                    const cep = document.getElementById("Cep").value;
+
+                    if (!cep) {
+                        alert("Por favor, informe um CEP.");
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/Pessoa/ConsultarCep?cep=${cep}`);
+
+                        if (!response.ok) {
+                            alert("Erro ao buscar o CEP. Verifique o CEP informado.");
+                            return;
+                        }
+
+                        const endereco = await response.json();
+
+                        document.getElementById("Logradouro").value = endereco.logradouro || "";
+                        document.getElementById("Cidade").value = endereco.localidade || "";
+                        document.getElementById("Estado").value = endereco.uf || "";
+                    } catch (error) {
+                        alert("Erro ao buscar o CEP.");
+                        console.error(error);
+                    }
+                }
+</script>
